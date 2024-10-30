@@ -1,5 +1,4 @@
 import {expect, describe, it} from "vitest";
-import {sayHello} from "./day01";
 
 enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 }
 const NUMBER_OF_DIRECTIONS = 4;
