@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Puzzles from 2016",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "vitest"
   },
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/neil-vass/advent-of-code-2016#readme",
   "devDependencies": {
+    "@types/node": "^22.8.6",
     "vitest": "^2.1.4"
   }
 }

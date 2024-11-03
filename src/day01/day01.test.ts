@@ -1,90 +1,66 @@
 import {expect, describe, it} from "vitest";
-
-enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 }
-const NUMBER_OF_DIRECTIONS = 4;
-type TurnDir = "R"|"L";
-
-class MapReader {
-    facing: Direction;
-    xPos: number;
-    yPos: number;
-    constructor() {
-        this.facing = Direction.NORTH;
-        this.xPos = 0;
-        this.yPos = 0;
-    }
-
-    turn(dir: TurnDir) {
-        this.facing += dir === "R" ? 1 : -1;
-        if (this.facing < 0) { this.facing = NUMBER_OF_DIRECTIONS -1; }
-        else if (this.facing >= NUMBER_OF_DIRECTIONS) { this.facing = 0; }
-    }
-
-    stepForward(steps: number) {
-        switch(this.facing) {
-            case Direction.NORTH:
-                this.yPos += steps;
-                break;
-            case Direction.EAST:
-                this.yPos += steps;
-                break;
-            case Direction.SOUTH:
-                this.xPos -= steps;
-                break;
-            case Direction.WEST:
-                this.yPos -= steps;
-                break;
-        }
-    }
-
-    followInstruction(turnDir: TurnDir, steps: number) {
-        this.turn(turnDir);
-        this.stepForward(steps);
-    }
-
-    travelledDistance() {
-        return Math.abs(this.xPos) + Math.abs(this.yPos)
-    }
-}
+import {Direction, parseInstruction, Walker} from "./day01.js";
 
 describe("Part 1", () => {
+    it("Parses a single instruction", async () => {
+        expect(parseInstruction("R2")).toStrictEqual({turn: "R", steps: 2});
+    });
+
     it("Can turn right", () => {
-        const mapReader = new MapReader();
+        const mapReader = new Walker();
         expect(mapReader.facing).toBe(Direction.NORTH);
         mapReader.turn("R");
         expect(mapReader.facing).toBe(Direction.EAST);
     });
 
     it("Can turn left", () => {
-        const mapReader = new MapReader();
-        mapReader.turn("L");
-        expect(mapReader.facing).toBe(Direction.WEST);
+        const walker = new Walker();
+        walker.turn("L");
+        expect(walker.facing).toBe(Direction.WEST);
     });
 
     it("Can spin", () => {
-        const mapReader = new MapReader();
-        for (let i=0; i<4; i++) { mapReader.turn("L"); }
-        expect(mapReader.facing).toBe(Direction.NORTH);
+        const walker = new Walker();
+        for (let i=0; i<4; i++) { walker.turn("L"); }
+        expect(walker.facing).toBe(Direction.NORTH);
     });
 
     it("Can take steps", () => {
-        const mapReader = new MapReader();
-        mapReader.stepForward(2);
-        expect(mapReader.facing).toBe(Direction.NORTH);
-        expect(mapReader.xPos).toBe(0);
-        expect(mapReader.yPos).toBe(2);
+        const walker = new Walker();
+        walker.stepForward(2);
+        expect(walker.facing).toBe(Direction.NORTH);
+        expect(walker.northPos).toBe(2);
+        expect(walker.eastPos).toBe(0);
     });
 
 
     it("Calculates distance after no moves", () => {
-        const mapReader = new MapReader();
-        expect(mapReader.travelledDistance()).toBe(0);
+        const walker = new Walker();
+        expect(walker.distanceFromStart()).toBe(0);
     });
 
     it("Calculates distance after one move", () => {
-        const mapReader = new MapReader();
-        mapReader.followInstruction("R", 2);
-        expect(mapReader.travelledDistance()).toBe(2);
+        const walker = new Walker();
+        walker.follow("R2");
+        expect(walker.distanceFromStart()).toBe(2);
+    });
+
+    it("Calculates distance after two moves", () => {
+        const walker = new Walker();
+        walker.follow("R2, L3");
+        expect(walker.distanceFromStart()).toBe(5);
+    });
+
+    it("Matches second example", () => {
+        const walker = new Walker();
+        walker.follow("R2, R2, R2");
+        expect(walker.distanceFromStart()).toBe(2);
+    });
+
+    it("Matches third example", () => {
+        const walker = new Walker();
+        walker.follow("R5, L5, R5, R3");
+        expect(walker.distanceFromStart()).toBe(12);
     });
 });
 
