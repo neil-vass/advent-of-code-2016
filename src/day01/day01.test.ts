@@ -64,3 +64,11 @@ describe("Part 1", () => {
     });
 });
 
+describe("Part 2", () => {
+    it("Matches example", () => {
+        const walker = new Walker();
+        walker.followUntilSamePlaceReachedTwice("R8, R4, R4, R8");
+        expect(walker.distanceFromStart()).toBe(4);
+    });
+});
+

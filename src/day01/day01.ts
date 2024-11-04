@@ -9,10 +9,16 @@ export class Walker {
     facing: Direction;
     northPos: number;
     eastPos: number;
+    visited: Set<string>;
     constructor() {
         this.facing = Direction.NORTH;
         this.northPos = 0;
         this.eastPos = 0;
+        this.visited = new Set([this.currentPosToString()]);
+    }
+
+    currentPosToString() {
+        return `${this.northPos},${this.eastPos}`;
     }
 
     turn(dir: Turn) {
@@ -40,10 +46,24 @@ export class Walker {
 
     follow(instructionStr: string) {
         const instructions = instructionStr.split(",").map(parseInstruction);
-        instructions.forEach(i => {
-            this.turn(i.turn);
-            this.stepForward(i.steps);
-        });
+        for(const instruction of instructions) {
+            this.turn(instruction.turn);
+            this.stepForward(instruction.steps);
+        }
+    }
+
+    followUntilSamePlaceReachedTwice(instructionStr: string) {
+        const instructions = instructionStr.split(",").map(parseInstruction);
+        for(const instruction of instructions) {
+            this.turn(instruction.turn);
+
+            for (let s = 0; s < instruction.steps; s++) {
+                this.stepForward(1);
+                const thisPos = this.currentPosToString();
+                if (this.visited.has(thisPos)) return;
+                this.visited.add(thisPos);
+            }
+        }
     }
 
     distanceFromStart() {
@@ -58,10 +78,20 @@ export function parseInstruction(str: string): Instruction {
     return {turn: turnStr as Turn, steps: +stepsStr};
 }
 
+function part1(instructions: string) {
+    const walker = new Walker();
+    walker.follow(instructions);
+    return walker.distanceFromStart();
+}
+
+function part2(instructions: string) {
+    const walker = new Walker();
+    walker.followUntilSamePlaceReachedTwice(instructions);
+    return walker.distanceFromStart();
+}
+
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const instructions = singleLineFromFile(`${import.meta.dirname}/day01.input.txt`);
-    const walker = new Walker();
-    walker.follow(instructions);
-    console.log(walker.distanceFromStart());
+    console.log(part2(instructions));
 }
