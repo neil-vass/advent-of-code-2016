@@ -95,18 +95,8 @@ export class Keypad {
 
 }
 
-export async function part1(instructions: Sequence<string>) {
-    const pad = new Keypad();
-
-    function accumulateCode(codeSoFar: string, instruction: string) {
-        return codeSoFar + pad.moveAndPress(instruction);
-    }
-
-    return await instructions.reduce(accumulateCode, "");
-}
-
-export async function part2(instructions: Sequence<string>) {
-    const pad = new Keypad("diamond");
+export async function solve(instructions: Sequence<string>, layout: string) {
+    const pad = new Keypad(layout);
 
     function accumulateCode(codeSoFar: string, instruction: string) {
         return codeSoFar + pad.moveAndPress(instruction);
@@ -118,5 +108,5 @@ export async function part2(instructions: Sequence<string>) {
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const instructions = linesFromFile(`${import.meta.dirname}/day02.input.txt`);
-    console.log(await part2(instructions));
+    console.log(await solve(instructions, "diamond"));
 }

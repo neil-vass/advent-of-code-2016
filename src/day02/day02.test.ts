@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {Keypad, part1, part2} from "./day02.js";
+import {Keypad, part1, part2, solve} from "./day02.js";
 import {Sequence} from "../helpers/sequence.js";
 
 
@@ -26,7 +26,7 @@ describe("Part 1", () => {
             "LURDL",
             "UUUUD"
         ]);
-        expect(await part1(instructions)).toBe("1985");
+        expect(await solve(instructions, "grid")).toBe("1985");
     });
 });
 
@@ -38,6 +38,6 @@ describe("Part 2", () => {
             "LURDL",
             "UUUUD"
         ]);
-        expect(await part2(instructions)).toBe("5DB3");
+        expect(await solve(instructions, "diamond")).toBe("5DB3");
     });
 });
