@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {Keypad, part1, part2, solve} from "./day02.js";
+import {Keypad, solve} from "./day02.js";
 import {Sequence} from "../helpers/sequence.js";
 
 
