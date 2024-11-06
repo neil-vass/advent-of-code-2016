@@ -36,7 +36,6 @@ export function orderLetters(lettersAndCounts: {[key: string]: number}) {
 }
 
 export function checksumFor(encryptedName: string) {
-    // collect
     const counter = countLetters(encryptedName);
     const orderedLettersWithCounts = orderLetters(counter);
     const letters = orderedLettersWithCounts.slice(0,5).map(x => x[0]);
@@ -48,7 +47,18 @@ export function isRealRoom(room: Room) {
 }
 
 export function decryptRoomName(room: Room) {
-    return "todo";
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+    let shifted = "";
+    for (const char of room.encryptedName) {
+        if (char === "-") {
+            shifted += " ";
+        } else {
+            const idx = (alphabet.indexOf(char) + room.sectorId) % alphabet.length;
+            shifted += alphabet[idx];
+        }
+    }
+
+    return shifted;
 }
 
 export async function solvePart1(input: Sequence<string>) {
@@ -57,10 +67,18 @@ export async function solvePart1(input: Sequence<string>) {
     return sumOfSectorIds;
 }
 
+// Print them out and have a read!
+export async function solvePart2(input: Sequence<string>) {
+    const realRooms = input.map(parseRoom).filter(isRealRoom)
+    for await (const room of realRooms) {
+        console.log(`${room.sectorId}: ${decryptRoomName(room)}`)
+    }
+}
+
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day04.input.txt`;
     const input = linesFromFile(filepath);
-    console.log(await solvePart1(input));
+    await solvePart2(input);
 }
 
