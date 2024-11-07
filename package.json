@@ -20,5 +20,8 @@
   "devDependencies": {
     "@types/node": "^22.8.6",
     "vitest": "^2.1.4"
+  },
+  "dependencies": {
+    "js-md5": "^0.8.3"
   }
 }
