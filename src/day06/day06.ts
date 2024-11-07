@@ -21,15 +21,15 @@ export async function countsAtEachPosition(messages: Sequence<string>) {
     return collectors;
 }
 
-export function mostFrequentLetterIn(lettersAndCounts: Counter) {
+export function leastFrequentLetterIn(lettersAndCounts: Counter) {
     const arr = Object.entries(lettersAndCounts);
-    arr.sort((a, b) => b[1] - a[1]);
+    arr.sort((a, b) => a[1] - b[1]); // part 1 was just this test reversed
     return arr[0][0];
 }
 
 export async function corrected(messages: Sequence<string>) {
     const collection = await countsAtEachPosition(messages);
-    return collection.reduce((acc, val) => acc + mostFrequentLetterIn(val), "");
+    return collection.reduce((acc, val) => acc + leastFrequentLetterIn(val), "");
 }
 
 // If this script was invoked directly on the command line:

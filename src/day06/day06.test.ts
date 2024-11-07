@@ -1,8 +1,8 @@
 import {describe, expect, it} from "vitest";
-import {corrected, countsAtEachPosition, mostFrequentLetterIn} from "./day06.js";
+import {corrected, countsAtEachPosition, leastFrequentLetterIn, mostFrequentLetterIn} from "./day06.js";
 import {Sequence} from "../helpers/sequence.js";
 
-describe("Part 1", () => {
+describe("Part 2", () => {
     it("Collects letter counts", async () => {
         const messages = new Sequence([
             "eed",
@@ -18,9 +18,9 @@ describe("Part 1", () => {
     });
 
     it("Finds most common letters", () => {
-        expect(mostFrequentLetterIn({
+        expect(leastFrequentLetterIn({
             "e": 2, "r": 3, "a": 1
-        })).toBe("r");
+        })).toBe("a");
     });
 
     it("Finds correct message", async () => {
@@ -42,6 +42,6 @@ describe("Part 1", () => {
             "dvrsen",
             "enarar"
         ]);
-        expect(await corrected(messages)).toBe("easter");
+        expect(await corrected(messages)).toBe("advent");
     });
 });
