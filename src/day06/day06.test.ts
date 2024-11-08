@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {corrected, countsAtEachPosition, leastFrequentLetterIn, mostFrequentLetterIn} from "./day06.js";
+import {corrected, countsAtEachPosition, leastFrequentLetterIn} from "./day06.js";
 import {Sequence} from "../helpers/sequence.js";
 
 describe("Part 2", () => {
