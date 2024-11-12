@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import {corrected, countsAtEachPosition, leastFrequentLetterIn} from "./day06.js";
-import {Sequence} from "../helpers/sequence.js";
+import {Sequence} from "generator-sequences";
 
 describe("Part 2", () => {
     it("Collects letter counts", async () => {

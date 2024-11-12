@@ -1,5 +1,5 @@
-import {Sequence} from "../helpers/sequence.js";
-import {linesFromFile} from "../helpers/filereader.js";
+import {linesFromFile, Sequence} from "generator-sequences";
+
 
 type Counter = {[key: string]: number};
 

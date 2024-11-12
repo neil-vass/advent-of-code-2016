@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {collectVerticalTriangles, isValidTriangle, parseTriangle, solvePart1} from "./day03.js";
-import {Sequence} from "../helpers/sequence.js";
+import {Sequence} from "generator-sequences";
 
 
 describe("Part 1", () => {

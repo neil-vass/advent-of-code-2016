@@ -1,4 +1,4 @@
-import {singleLineFromFile} from "../helpers/filereader.js";
+import {singleLineFromFile} from "generator-sequences";
 
 export enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 }
 export const NUMBER_OF_DIRECTIONS = 4;

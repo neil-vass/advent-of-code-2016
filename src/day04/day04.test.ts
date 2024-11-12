@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import {checksumFor, countLetters, decryptRoomName, isRealRoom, orderLetters, parseRoom, solvePart1} from "./day04.js";
-import {Sequence} from "../helpers/sequence.js";
+import {Sequence} from "generator-sequences";
 
 describe("Part 1", () => {
     it("Parses room name", () => {

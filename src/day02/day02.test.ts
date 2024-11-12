@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import {Keypad, solve} from "./day02.js";
-import {Sequence} from "../helpers/sequence.js";
+import {Sequence} from "generator-sequences";
 
 
 describe("Part 1", () => {

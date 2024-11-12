@@ -1,6 +1,4 @@
-import {linesFromFile} from "../helpers/filereader.js";
-import {Sequence} from "../helpers/sequence.js";
-
+import {linesFromFile, Sequence} from "generator-sequences";
 
 export function isValidTriangle(a: number, b: number, c: number) {
     return (a + b > c) && (a + c > b) && (b + c > a);

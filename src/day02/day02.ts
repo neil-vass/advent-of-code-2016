@@ -1,5 +1,4 @@
-import {linesFromFile} from "../helpers/filereader.js";
-import {Sequence} from "../helpers/sequence.js";
+import {linesFromFile, Sequence} from "generator-sequences";
 
 const U = "U";
 const D = "D";
