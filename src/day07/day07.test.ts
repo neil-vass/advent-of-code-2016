@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {hasABBA, splitAddress, supportsTLS} from "./day07.js";
+import {hasABBA, splitAddress, supportsSSL, supportsTLS} from "./day07.js";
 
 
 describe("Part 1", () => {
@@ -22,5 +22,13 @@ describe("Part 1", () => {
         expect(supportsTLS("abcd[bddb]xyyx")).toBe(false);
         expect(supportsTLS("aaaa[qwer]tyui")).toBe(false);
         expect(supportsTLS("ioxxoj[asdfgh]zxcvbn")).toBe(true);
+    });
+});
+
+describe("Part 2", () => {
+    it("Solves examples from description", () => {
+        expect(supportsSSL("aba[bab]xyz")).toBe(true);
+        expect(supportsSSL("xyx[xyx]xyx")).toBe(false);
+        expect(supportsSSL("zazbz[bzb]cdb")).toBe(true);
     });
 });
