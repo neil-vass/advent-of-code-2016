@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {decompressedLengthOf} from "./day09.js";
+import {decompressedLengthOf, decompressedLengthV2} from "./day09.js";
 
 describe("Part 1", () => {
     it("Gives string length when no markers", () => {
@@ -26,3 +26,19 @@ describe("Part 1", () => {
         expect(decompressedLengthOf("X(8x2)(3x3)ABCY")).toBe(18);
     });
 });
+
+describe("Part 2", () => {
+    it("Behaves like V1 when there's no nested markers", () => {
+        expect(decompressedLengthV2("(3x3)XYZ")).toBe(9);
+    });
+
+    it("Double decompresses", () => {
+        expect(decompressedLengthV2("X(8x2)(3x3)ABCY")).toBe(20);
+    });
+
+    it("Solves complicated examples", () => {
+        expect(decompressedLengthV2("(27x12)(20x12)(13x14)(7x10)(1x12)A")).toBe(241920);
+        expect(decompressedLengthV2("(25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN")).toBe(445);
+    });
+});
+
