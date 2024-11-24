@@ -109,6 +109,35 @@ export class Factory {
 
         throw new Error(`Finished all moves, never compared these chips`);
     }
+
+    whatsInOutputs(outputLabels: number[]) {
+        outputLabels = [...outputLabels];
+        let productOfChipLabelsInOutputs = 1;
+        let movedThisRound: boolean;
+
+        do {
+            movedThisRound = false;
+            for (const bot of this.botCollection.values()) {
+                const chipsToPass = bot.giveChips();
+                if (chipsToPass.length === 0) continue;
+
+                for (const pass of chipsToPass) {
+                    if (pass.hardware === BOT) {
+                        this.botCollection.get(pass.label)!.receiveChip(pass.chip);
+                    } else if (pass.hardware === OUTPUT) {
+                        if (outputLabels.includes(pass.label)) {
+                            productOfChipLabelsInOutputs *= pass.chip;
+                            outputLabels.splice(outputLabels.indexOf(pass.label), 1);
+                            if (outputLabels.length === 0) return productOfChipLabelsInOutputs;
+                        }
+                    }
+                }
+                movedThisRound = true;
+            }
+        } while (movedThisRound);
+
+        throw new Error(`Finished all moves, never compared these chips`);
+    }
 }
 
 export async function solvePart1(lines: Sequence<string>) {
@@ -116,8 +145,13 @@ export async function solvePart1(lines: Sequence<string>) {
     return factory.whichBotCompares(61, 17);
 }
 
+export async function solvePart2(lines: Sequence<string>) {
+    const factory = await Factory.buildFromDescription(lines);
+    return factory.whatsInOutputs([0, 1, 2]);
+}
+
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day10.input.txt`;
-    console.log(await solvePart1(linesFromFile(filepath)));
+    console.log(await solvePart2(linesFromFile(filepath)));
 }
