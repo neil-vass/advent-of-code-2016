@@ -84,8 +84,10 @@ export class Factory {
         return new Factory(botCollection);
     }
 
-    whichBotCompares(chipA: number, chipB: number) {
-        const chipsToFlag = new Set([chipA, chipB]);
+    // Loops through the system, pausing to hand out details each time a
+    // bot is passing chips. Callers can use this to check the condition
+    // they're looking for.
+    private *runSystem() {
         let movedThisRound: boolean;
 
         do {
@@ -94,10 +96,7 @@ export class Factory {
                 const chipsToPass = bot.giveChips();
                 if (chipsToPass.length === 0) continue;
 
-                const chipSet = new Set(chipsToPass.map(c => c.chip));
-                if(chipSet.symmetricDifference(chipsToFlag).size === 0) {
-                    return bot.label;
-                }
+                yield {bot, chipsToPass};
 
                 for (const pass of chipsToPass) {
                     if (pass.hardware === BOT) {
@@ -107,6 +106,17 @@ export class Factory {
                 movedThisRound = true;
             }
         } while (movedThisRound);
+    }
+
+    whichBotCompares(chipA: number, chipB: number) {
+        const chipsToFlag = new Set([chipA, chipB]);
+
+        for (const {bot, chipsToPass} of this.runSystem()) {
+            const chipSet = new Set(chipsToPass.map(c => c.chip));
+            if(chipSet.symmetricDifference(chipsToFlag).size === 0) {
+                return bot.label;
+            }
+        }
 
         throw new Error(`Finished all moves, never compared these chips`);
     }
@@ -114,30 +124,20 @@ export class Factory {
     whatsInOutputs(outputLabels: number[]) {
         const outputsStillToCollect = new Set(outputLabels);
         let productOfChipLabelsInOutputs = 1;
-        let movedThisRound: boolean;
 
-        do {
-            movedThisRound = false;
-            for (const bot of this.botCollection.values()) {
-                const chipsToPass = bot.giveChips();
-                if (chipsToPass.length === 0) continue;
+        for (const {bot, chipsToPass} of this.runSystem()) {
+            for (const pass of chipsToPass) {
+                if (pass.hardware !== OUTPUT) continue;
 
-                for (const pass of chipsToPass) {
-                    if (pass.hardware === BOT) {
-                        this.botCollection.get(pass.label)!.receiveChip(pass.chip);
-                    } else if (pass.hardware === OUTPUT) {
-                        if (outputsStillToCollect.has(pass.label)) {
-                            productOfChipLabelsInOutputs *= pass.chip;
-                            outputsStillToCollect.delete(pass.label);
-                            if (outputsStillToCollect.size === 0) return productOfChipLabelsInOutputs;
-                        }
-                    }
+                if (outputsStillToCollect.has(pass.label)) {
+                    productOfChipLabelsInOutputs *= pass.chip;
+                    outputsStillToCollect.delete(pass.label);
+                    if (outputsStillToCollect.size === 0) return productOfChipLabelsInOutputs;
                 }
-                movedThisRound = true;
             }
-        } while (movedThisRound);
+        }
 
-        throw new Error(`Finished all moves, never compared these chips`);
+        throw new Error(`Finished all moves, those outputs are missing chips`);
     }
 }
 
@@ -154,5 +154,5 @@ export async function solvePart2(lines: Sequence<string>) {
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day10.input.txt`;
-    console.log(await solvePart1(linesFromFile(filepath)));
+    console.log(await solvePart2(linesFromFile(filepath)));
 }
