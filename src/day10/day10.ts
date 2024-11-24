@@ -111,7 +111,7 @@ export class Factory {
     }
 
     whatsInOutputs(outputLabels: number[]) {
-        outputLabels = [...outputLabels];
+        const outputsStillToCollect = new Set(outputLabels);
         let productOfChipLabelsInOutputs = 1;
         let movedThisRound: boolean;
 
@@ -125,10 +125,10 @@ export class Factory {
                     if (pass.hardware === BOT) {
                         this.botCollection.get(pass.label)!.receiveChip(pass.chip);
                     } else if (pass.hardware === OUTPUT) {
-                        if (outputLabels.includes(pass.label)) {
+                        if (outputsStillToCollect.has(pass.label)) {
                             productOfChipLabelsInOutputs *= pass.chip;
-                            outputLabels.splice(outputLabels.indexOf(pass.label), 1);
-                            if (outputLabels.length === 0) return productOfChipLabelsInOutputs;
+                            outputsStillToCollect.delete(pass.label);
+                            if (outputsStillToCollect.size === 0) return productOfChipLabelsInOutputs;
                         }
                     }
                 }
