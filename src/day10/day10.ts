@@ -12,6 +12,33 @@ export interface BotCollection {[label: number]:
         { holding: number[], low: Destination, high: Destination }}
 
 
+function parseBotSetupLine(line: string) {
+    const botSetup = line.match(/^bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+)$/);
+    if (botSetup) {
+        const [, botId, lowHardware, lowLabel, highHardware, highLabel] = botSetup;
+        return {
+            id: +botId,
+            details: {
+                holding: [],
+                low: {hardware: lowHardware as HardwareName, label: +lowLabel},
+                high: {hardware: highHardware as HardwareName, label: +highLabel}
+            }
+        }
+    }
+    return null;
+}
+
+function parseChipSetupLine(line: string) {
+    const chipSetup = line.match(/^value (\d+) goes to bot (\d+)$/);
+    if (chipSetup) {
+        const [, chipLabel, botLabel] = chipSetup;
+        return {chip: +chipLabel, bot: +botLabel};
+    }
+    return null;
+}
+
+
+
 export class Factory {
     private constructor(private botCollection: BotCollection) {}
 
@@ -20,21 +47,15 @@ export class Factory {
         const startingChips = [] as { chip: number, bot: number }[];
 
         for await (const line of lines) {
-            const botSetup = line.match(/^bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+)$/);
+            const botSetup = parseBotSetupLine(line);
             if (botSetup) {
-                const [, botId, lowHardware, lowLabel, highHardware, highLabel] = botSetup;
-                botCollection[+botId] = {
-                    holding: [],
-                    low: { hardware: lowHardware as HardwareName, label: +lowLabel },
-                    high: { hardware: highHardware as HardwareName, label: +highLabel }
-                }
+                botCollection[botSetup.id] = botSetup.details;
                 continue;
             }
 
-            const chipSetup = line.match(/^value (\d+) goes to bot (\d+)$/);
+            const chipSetup = parseChipSetupLine(line);
             if (chipSetup) {
-                const [, chipLabel, botLabel] = chipSetup;
-                startingChips.push({ chip: +chipLabel, bot: +botLabel });
+                startingChips.push(chipSetup);
                 continue;
             }
 
