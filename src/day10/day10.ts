@@ -85,7 +85,7 @@ export class Factory {
     }
 
     whichBotCompares(chipA: number, chipB: number) {
-        const chipsToFlag = [chipA, chipB];
+        const chipsToFlag = new Set([chipA, chipB]);
         let movedThisRound: boolean;
 
         do {
@@ -94,7 +94,8 @@ export class Factory {
                 const chipsToPass = bot.giveChips();
                 if (chipsToPass.length === 0) continue;
 
-                if(chipsToPass.map(c => c.chip).every(passed => chipsToFlag.includes(passed))) {
+                const chipSet = new Set(chipsToPass.map(c => c.chip));
+                if(chipSet.symmetricDifference(chipsToFlag).size === 0) {
                     return bot.label;
                 }
 
@@ -153,5 +154,5 @@ export async function solvePart2(lines: Sequence<string>) {
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day10.input.txt`;
-    console.log(await solvePart2(linesFromFile(filepath)));
+    console.log(await solvePart1(linesFromFile(filepath)));
 }
