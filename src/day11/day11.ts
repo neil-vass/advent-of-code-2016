@@ -7,6 +7,7 @@ const MICROCHIP = "microchip";
 export type TechType = typeof GENERATOR | typeof MICROCHIP;
 
 export type SerializedFacility = string;
+export const GOAL_CONDITION: SerializedFacility = "goal";
 
 export function parseFloor(line: string) {
     const floor = new Floor();
@@ -49,8 +50,15 @@ export class Facility {
         return new Facility(floors);
     }
 
-    serialize(): SerializedFacility {
-        return JSON.stringify(this);
+
+    serializeToCheckForGoalCondition(): SerializedFacility {
+        // If all the microchips are on the top floor, we've met the goal.
+        const itemsNotAtTop = this.floors.slice(0, -1).flatMap(f => [...f.items]);
+        if (itemsNotAtTop.some(item => item.tech === MICROCHIP)) {
+            return JSON.stringify(this);
+        } else {
+            return GOAL_CONDITION;
+        }
     }
 
     static deserialize(serial: SerializedFacility) {
@@ -80,6 +88,7 @@ export class Facility {
 
 // Let's go exploring.
 export const Explorer: WeightedGraph<SerializedFacility> = {
+
     // "to" is ignored here; rather than a specific destination, we want some
     // conditions met and don't care about others.
     heuristic(from: SerializedFacility, to: SerializedFacility): number {
@@ -103,6 +112,7 @@ export const Explorer: WeightedGraph<SerializedFacility> = {
         return score;
     },
 
+    // Where can we get to from here, in one step?
     neighbours(currentNode: SerializedFacility): Iterable<{ node: SerializedFacility; cost: number }> {
         return undefined;
     }

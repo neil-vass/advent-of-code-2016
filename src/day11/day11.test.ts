@@ -1,5 +1,5 @@
 import {expect, describe, it, beforeEach} from "vitest";
-import {Explorer, Facility, Floor, Item, parseFloor} from "./day11.js";
+import {Explorer, Facility, Floor, GOAL_CONDITION, Item, parseFloor} from "./day11.js";
 import {Sequence} from "generator-sequences";
 
 
@@ -13,14 +13,23 @@ describe("Part 1", () => {
             ]));
     });
 
-    it("Serilializes for easy checking of whether we've seen a state before", async () => {
+    it("Serializes for easy checking of whether we've seen a state before", async () => {
         const input = new Sequence([
             "The first floor contains a hydrogen-compatible microchip.",
             "The second floor contains a hydrogen generator."
         ]);
         const facility = await Facility.buildFromDescription(input);
-        expect(facility.serialize()).toBe(
+        expect(facility.serializeToCheckForGoalCondition()).toBe(
             '{"floors":[{"items":["hydrogen microchip"]},{"items":["hydrogen generator"]}],"elevatorFloor":0}');
+    });
+
+    it("Serializes to the general GOAL_CONDITION response if goal is reached", async () => {
+        const input = new Sequence([
+            "The first floor contains a hydrogen generator.",
+            "The second floor contains a hydrogen-compatible microchip and a lithium-compatible microchip."
+        ]);
+        const facility = await Facility.buildFromDescription(input);
+        expect(facility.serializeToCheckForGoalCondition()).toBe(GOAL_CONDITION);
     });
 
     it("Deserializes to come back and explore a state further", async () => {
@@ -34,6 +43,7 @@ describe("Part 1", () => {
             new Item("hydrogen", "microchip")
         ]));
     });
+
 
     it("Calculates single-step heuristic", async () => {
         // You can complete this in one move.
@@ -58,7 +68,7 @@ describe("Part 1", () => {
         ]);
 
         const facility = await Facility.buildFromDescription(input);
-        expect(Explorer.heuristic(facility.serialize(), "")).toBeCloseTo(3);
+        expect(Explorer.heuristic(facility.serializeToCheckForGoalCondition(), "")).toBeCloseTo(3);
     });
 
 });
