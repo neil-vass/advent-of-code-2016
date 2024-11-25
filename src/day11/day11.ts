@@ -25,7 +25,7 @@ export class Floor {
 }
 
 export class Facility {
-
+    private elevatorFloor = 0;
     private constructor(readonly floors: Array<Floor>) {}
 
     static async buildFromDescription(lines: Sequence<string>) {
@@ -33,7 +33,13 @@ export class Facility {
         for await (const line of lines) {
             floors.push(parseFloor(line));
         }
+
+        return new Facility(floors);
     }
+
+    // You have possible steps, some of which are dead ends.
+    // When a path's taking you _away_ from the state you want, weight against it.
+    //
 }
 
 // If this script was invoked directly on the command line:
