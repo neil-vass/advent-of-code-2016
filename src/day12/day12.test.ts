@@ -1,8 +1,18 @@
 import {expect, describe, it} from "vitest";
-import {fn} from "./day12.js";
+import {Assembunny} from "./day12.js";
 
-describe("#fn", () => {
-    it("runs", () => {
-        expect(fn("")).toBe("a real test");
+describe("Part 1", () => {
+    it("Runs instructions", () => {
+        const sut = new Assembunny();
+        const instructions = [
+            "cpy 41 a",
+            "inc a",
+            "inc a",
+            "dec a",
+            "jnz a 2",
+            "dec a",
+        ];
+        sut.run(instructions);
+        expect(sut.getRegisterValue("a")).toBe(42);
     });
 });
