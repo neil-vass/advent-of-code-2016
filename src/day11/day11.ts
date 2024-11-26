@@ -1,13 +1,13 @@
-import exp from "node:constants";
 import {linesFromFile, Sequence} from "generator-sequences";
-import {A_starSearch, WeightedGraph} from "../utils/graphSearch.js";
+import {MinPriorityQueue} from "../utils/graphSearch.js";
 
 const GENERATOR = "generator";
 const MICROCHIP = "microchip";
 export type TechType = typeof GENERATOR | typeof MICROCHIP;
 
 export type SerializedFacility = string;
-export const GOAL_CONDITION: SerializedFacility = "goal";
+export type StateCategorization = string;
+export const GOAL_CONDITION: StateCategorization = "goal";
 
 export function parseFloor(line: string) {
     const floor = new Floor();
@@ -39,14 +39,21 @@ export class Floor {
     // It's fine if: there are no generators at all, or if each microchip
     // has its matching generator to protect it.
     isValid() {
-        const generators = this.items.filter(i => i.tech === GENERATOR);
+        const generators = this.generators();
         if (generators.length === 0) return true;
 
-        const microchips = this.items.filter(i => i.tech === MICROCHIP);
-        for (const m of microchips) {
+        for (const m of this.microchips()) {
             if (generators.every(g => g.element !== m.element)) return false;
         }
         return true;
+    }
+
+    microchips() {
+        return this.items.filter(i => i.tech === MICROCHIP);
+    }
+
+    generators() {
+        return this.items.filter(i => i.tech === GENERATOR);
     }
 }
 
@@ -63,14 +70,24 @@ export class Facility {
         return new Facility(floors);
     }
 
-    serializeToCheckForGoalCondition(): SerializedFacility {
+    serialize(): SerializedFacility {
+        return JSON.stringify(this);
+    }
+
+    categorizeState(): StateCategorization {
         // If all the items are on the top floor, we've met the goal.
         const itemsNotAtTop = this.floors.slice(0, -1).flatMap(f => f.items);
-        if (itemsNotAtTop.length === 0) {
-            return GOAL_CONDITION;
-        } else {
-            return JSON.stringify(this);
+        if (itemsNotAtTop.length === 0) return GOAL_CONDITION;
+
+        // Otherwise, counts of chips and generators on each floor, plus
+        // elevator position, is enough to categorize equivalent states.
+        const state = { elevator: this.elevatorFloor, floors: [] as any[] };
+        for (const floor of this.floors) {
+            state.floors.push({
+                microchips: floor.microchips().length,
+                generators: floor.generators().length});
         }
+        return JSON.stringify(state);
     }
 
     static deserialize(serial: SerializedFacility) {
@@ -112,19 +129,49 @@ export class Facility {
 }
 
 // Let's go exploring.
-export const Explorer: WeightedGraph<SerializedFacility> = {
+export const Explorer = {
+
+    // Adaptation of the A_starSearch function from graphSearch.ts.
+    // Same algorithm, but stores Facility objects (to carry on exploring) along with
+    // a summary of their "state" to check for "have we seen this before" equivalents.
+    shortestPathToGoal(start: Facility) {
+        const frontier = new MinPriorityQueue<Facility>();
+        const visited = new Map<StateCategorization, { costSoFar: number, cameFrom: Facility | null }>();
+
+        frontier.push(start, 0);
+        visited.set(start.categorizeState(), { costSoFar: 0, cameFrom: null });
+
+        while (!frontier.isEmpty()) {
+            const current = frontier.pull()!;
+            if (current.categorizeState() === GOAL_CONDITION) break;
+
+            for (const n of this.neighbours(current)) {
+                const newCost = visited.get(current.categorizeState())!.costSoFar + n.cost;
+                const oldCost = visited.get(n.node.categorizeState())?.costSoFar;
+
+                // If we haven't been here before, _or_ if we've found a cheaper way to get here
+                if (oldCost === undefined || newCost < oldCost) {
+                    const priority = newCost + this.heuristic(n.node);
+                    frontier.push(n.node, priority);
+                    visited.set(n.node.categorizeState(), { costSoFar: newCost, cameFrom: current});
+                }
+            }
+        }
+
+        // Todo: we can just return cost to goal, right? Or throw?
+        return visited;
+    },
 
     // "to" is ignored here; rather than a specific destination, we want some
     // conditions met and don't care about others.
-    heuristic(from: SerializedFacility, to: SerializedFacility): number {
+    heuristic(from: Facility): number {
         // Win condition: all microchips on top floor, don't care where
         // anything else is (generators, elevator). Min moves from here to
         // there: you can move two items at a time, so let's say 0.5 "cost"
         // for each floor away from the top each microchip is.
-        if (from === GOAL_CONDITION) return 0;
         let score = 0;
 
-        const currentState = Facility.deserialize(from);
+        const currentState = from;
         const topFloorNum = currentState.floors.length - 1;
         if (topFloorNum < 1) return score;
 
@@ -137,8 +184,9 @@ export const Explorer: WeightedGraph<SerializedFacility> = {
     },
 
     // Where can we get to from here, in one step?
-    *neighbours(currentNode: SerializedFacility): Iterable<{ node: SerializedFacility; cost: number }> {
-        let currentState = Facility.deserialize(currentNode);
+    *neighbours(currentNode: Facility): Iterable<{ node: Facility; cost: number }> {
+        const serial = currentNode.serialize();
+        let currentState = Facility.deserialize(serial);
 
         const floorsWeCanMoveToIdx = new Array<number>();
         if (currentState.elevatorFloor > 0) {
@@ -153,12 +201,12 @@ export const Explorer: WeightedGraph<SerializedFacility> = {
                 currentState.move(itemsToMove, floorIdx);
                 if (currentState.isValid()) {
                     yield {
-                        node: currentState.serializeToCheckForGoalCondition(),
+                        node: currentState,
                         cost: 1
                     };
                 }
                 // Reset changes and keep looking for neighbours.
-                currentState = Facility.deserialize(currentNode);
+                currentState = Facility.deserialize(serial);
             }
         }
     }
@@ -174,8 +222,7 @@ export function *onesAndTwos(itemCount: number) {
 }
 
 export async function solvePart1(facility: Facility) {
-    const initialCondition = facility.serializeToCheckForGoalCondition();
-    const searchResult = A_starSearch(Explorer, initialCondition, GOAL_CONDITION);
+    const searchResult = Explorer.shortestPathToGoal(facility);
     const bestPathToGoal = searchResult.get(GOAL_CONDITION);
 
     if (bestPathToGoal === undefined) {
