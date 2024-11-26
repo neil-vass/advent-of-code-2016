@@ -1,29 +1,44 @@
 import {md5} from "js-md5";
 import {singleLineFromFile} from "generator-sequences";
 
-const cache = new Map<string, string>();
+const hashCache = new Map<string, string>();
 
-function hash(str: string) {
-    let answer = cache.get(str);
+export function hash(str: string) {
+    let answer = hashCache.get(str);
     if(!answer) {
         answer = md5(str);
-        cache.set(str, answer);
+        hashCache.set(str, answer);
     }
     return answer;
 }
 
-export function indexOfKey(keyNum: number, salt: string) {
+const stretchedHashCache = new Map<string, string>();
+
+export function stretchedHash(str: string) {
+    let answer = stretchedHashCache.get(str);
+    if(!answer) {
+        answer = md5(str);
+        for (let i=0; i<2016; i++) {
+            answer = md5(answer);
+        }
+        stretchedHashCache.set(str, answer);
+    }
+    return answer;
+}
+
+
+export function indexOfKey(keyNum: number, salt: string, hashFn=hash) {
     let index = -1;
     let currentKeyNum = 0;
     while (currentKeyNum < keyNum) {
         index++;
-        const matchTriple = hash(salt + index).match(/(.)\1\1/);
+        const matchTriple = hashFn(salt + index).match(/(.)\1\1/);
         if (matchTriple) {
             const [, repeatedChar] = matchTriple;
             const re = new RegExp(`(${repeatedChar}){5}`);
 
             for(let j=1; j<=1000; j++) {
-                if (hash(salt + (index+j)).match(re)) {
+                if (hashFn(salt + (index+j)).match(re)) {
                     currentKeyNum++;
                     break;
                 }
@@ -38,5 +53,5 @@ export function indexOfKey(keyNum: number, salt: string) {
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day14.input.txt`;
     const salt = singleLineFromFile(filepath);
-    console.log(indexOfKey(64, salt));
+    console.log(indexOfKey(64, salt, stretchedHash));
 }
