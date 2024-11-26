@@ -129,9 +129,8 @@ export const Explorer: WeightedGraph<SerializedFacility> = {
         if (topFloorNum < 1) return score;
 
         for (let currFloor = 0; currFloor < topFloorNum; currFloor++) {
-            const items =  currentState.floors[currFloor].items;
-            const chips = items.filter(item => item.tech === MICROCHIP).length;
-            score += 0.5 * chips * (topFloorNum - currFloor);
+            const items =  currentState.floors[currFloor].items.length;
+            score += 0.5 * items * (topFloorNum - currFloor);
         }
 
         return score;
@@ -174,8 +173,7 @@ export function *onesAndTwos(itemCount: number) {
     }
 }
 
-export async function solvePart1(input: Sequence<string>) {
-    const facility = await Facility.buildFromDescription(input);
+export async function solvePart1(facility: Facility) {
     const initialCondition = facility.serializeToCheckForGoalCondition();
     const searchResult = A_starSearch(Explorer, initialCondition, GOAL_CONDITION);
     const bestPathToGoal = searchResult.get(GOAL_CONDITION);
@@ -187,8 +185,18 @@ export async function solvePart1(input: Sequence<string>) {
     }
 }
 
+export async function solvePart2(facility: Facility) {
+    facility.floors[0].items.push(new Item("elerium", "generator"));
+    facility.floors[0].items.push(new Item("elerium", "microchip"));
+    facility.floors[0].items.push(new Item("dilithium", "generator"));
+    facility.floors[0].items.push(new Item("dilithium", "microchip"));
+    return solvePart1(facility);
+}
+
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day11.input.txt`;
-    console.log(await solvePart1(linesFromFile(filepath)));
+    const input = linesFromFile(filepath);
+    const facility = await Facility.buildFromDescription(input);
+    console.log(await solvePart2(facility));
 }

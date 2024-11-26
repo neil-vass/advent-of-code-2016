@@ -116,7 +116,8 @@ describe("Part 1", () => {
             "The first floor contains a hydrogen-compatible microchip.",
             "The second floor contains a hydrogen generator."
         ]);
-        expect(await solvePart1(input)).toBe(1);
+        const facility = await Facility.buildFromDescription(input);
+        expect(await solvePart1(facility)).toBe(1);
     });
 
     it("Microchips are protected from other generators when their compatible one is present", async () => {
@@ -124,7 +125,8 @@ describe("Part 1", () => {
             "The first floor contains a hydrogen-compatible microchip.",
             "The second floor contains a hydrogen generator and a lithium generator."
         ]);
-        expect(await solvePart1(input)).toBe(1);
+        const facility = await Facility.buildFromDescription(input);
+        expect(await solvePart1(facility)).toBe(1);
     });
 
     it("Solves example from puzzle description", async () => {
@@ -134,6 +136,7 @@ describe("Part 1", () => {
             "The third floor contains a lithium generator.",
             "The fourth floor contains nothing relevant.",
         ]);
-        expect(await solvePart1(input)).toBe(11);
+        const facility = await Facility.buildFromDescription(input);
+        expect(await solvePart1(facility)).toBe(11);
     });
 });
