@@ -25,14 +25,11 @@ export function generateChecksum(data: string) {
     return checksum.join("");
 }
 
-function solvePart1(filepath: string) {
-    const initial = singleLineFromFile(filepath);
-    const data = generateData(initial, 272);
-    return generateChecksum(data);
-}
-
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day16.input.txt`;
-    console.log(solvePart1(filepath));
+    const initial = singleLineFromFile(filepath);
+    const desiredLength = 35651584;
+    const data = generateData(initial, desiredLength);
+    console.log(generateChecksum(data));
 }
