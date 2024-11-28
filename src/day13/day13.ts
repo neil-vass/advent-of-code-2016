@@ -1,12 +1,7 @@
-import {A_starSearch, FifoQueue, Graph, WeightedGraph} from "../utils/graphSearch.js";
+import {A_starSearch, FifoQueue, WeightedGraph} from "../utils/graphSearch.js";
 import {singleLineFromFile} from "generator-sequences";
 
 type Pos = { x: number, y: number };
-type HashedPos = string;
-
-const hash = (x: number, y: number) : HashedPos => JSON.stringify({x, y});
-const unHash = (s: HashedPos) : Pos => JSON.parse(s);
-
 
 export function isOpen(x: number, y: number, favourite: number) {
     const calc = (x*x + 3*x + 2*x*y + y + y*y) + favourite;
@@ -15,59 +10,64 @@ export function isOpen(x: number, y: number, favourite: number) {
     return ones.length % 2 === 0;
 }
 
-class Explorer implements WeightedGraph<HashedPos> {
+class Explorer implements WeightedGraph<Pos> {
     constructor(readonly favourite: number) {}
 
-    *neighbours(currentNode: HashedPos): Iterable<{ node: HashedPos; cost: number; }> {
-        const {x, y} = unHash(currentNode);
+    *neighbours(currentNode: Pos): Iterable<{ node: Pos; cost: number; }> {
+        const {x, y} = currentNode
 
         if (x > 0 && isOpen(x-1, y, this.favourite)) {
-            yield { node: hash(x-1, y), cost: 1 };
+            yield { node: {x: x-1, y}, cost: 1 };
         }
         if (isOpen(x+1, y, this.favourite)) {
-            yield { node: hash(x+1, y), cost: 1 };
+            yield { node: {x: x+1, y}, cost: 1 };
         }
         if (y > 0 && isOpen(x, y-1, this.favourite)) {
-            yield { node: hash(x, y-1), cost: 1 };
+            yield { node: {x, y: y-1}, cost: 1 };
         }
         if (isOpen(x, y+1, this.favourite)) {
-            yield { node: hash(x, y+1), cost: 1 };
+            yield { node: {x, y: y+1}, cost: 1 };
         }
     }
 
-    heuristic(from: HashedPos, to: HashedPos): number {
+    heuristic(from: Pos, to: Pos): number {
         // Best case: Manhattan distance.
-        const [f, t] = [unHash(from), unHash(to)];
-        return Math.abs(t.x - f.x) + Math.abs(t.x - f.x);
+        return Math.abs(to.x - from.x) + Math.abs(to.x - from.x);
+    }
+
+    isAtGoal(candidate: Pos, goal: Pos): boolean {
+        return candidate.x === goal.x && candidate.y === goal.y;
     }
 }
 
 export function shortestPath(goal_x: number, goal_y: number, favourite: number) {
     const explorer = new Explorer(favourite);
-    const start = hash(1, 1);
-    const goal = hash(goal_x, goal_y);
-    const results = A_starSearch(explorer, start, goal);
-    const pathToGoal = results.get(goal);
-
-    if(!pathToGoal) throw new Error(`No path to goal!`);
-    return pathToGoal.costSoFar;
+    const start = {x: 1, y: 1};
+    const goal = {x: goal_x, y: goal_y};
+    return A_starSearch(explorer, start, goal);
 }
 
 // Adapted from breadthFirstSearch in graphSearch.ts.
 export function reachableLocations<TNode>(graph: WeightedGraph<TNode>, start: TNode, maxSteps: number) {
-    const frontier = new FifoQueue<{ pos: TNode, steps: number }>();
-    const reached = new Set<TNode>();
+    type SavedNode = string;
+    const save = (n: TNode): SavedNode => JSON.stringify(n);
+    const load = (s: SavedNode): TNode => JSON.parse(s);
 
-    frontier.push({pos: start, steps: 0 });
-    reached.add(start);
+    const frontier = new FifoQueue<{ pos: SavedNode, steps: number }>();
+    const reached = new Set<SavedNode>();
+
+    const savedStart = save(start);
+    frontier.push({pos: savedStart, steps: 0 });
+    reached.add(savedStart);
 
     while (!frontier.isEmpty()) {
         const current = frontier.pull()!;
         if (current.steps >= maxSteps) continue;
-        for (const n of graph.neighbours(current.pos)) {
-            if (!reached.has(n.node)) {
-                frontier.push({ pos: n.node, steps: current.steps+1 });
-                reached.add(n.node);
+        for (const n of graph.neighbours(load(current.pos))) {
+            const savedNode = save(n.node);
+            if (!reached.has(savedNode)) {
+                frontier.push({ pos: savedNode, steps: current.steps+1 });
+                reached.add(savedNode);
             }
         }
     }
@@ -77,7 +77,7 @@ export function reachableLocations<TNode>(graph: WeightedGraph<TNode>, start: TN
 
 export function solvePart2(maxSteps: number, favourite: number) {
     const explorer = new Explorer(favourite);
-    const start = hash(1, 1);
+    const start = {x: 1, y: 1};
     return reachableLocations(explorer, start, maxSteps).size;
 }
 

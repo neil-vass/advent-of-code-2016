@@ -71,18 +71,19 @@ describe("A* search", () => {
                 }
             },
 
-            heuristic(from: string, to: string) {
-                return 0;
+            heuristic(from: string, to: string) { return 0; },
+
+            isAtGoal(candidate: string, goal: string) {
+                return candidate === goal;
             }
         }
 
-        const result = A_starSearch(graph, "A", "B");
-        const shortestRoute = result.get("B")!.costSoFar;
-        expect(shortestRoute).toStrictEqual(1);
+        const cheapestCostToGoal = A_starSearch(graph, "A", "B");
+        expect(cheapestCostToGoal).toStrictEqual(1);
 
     });
 
-    it("Takes shorter route with more nodes", () => {
+    it("Takes cheaper route with more nodes", () => {
         const graph = {
             neighbours(node: string) {
                 switch(node) {
@@ -94,14 +95,15 @@ describe("A* search", () => {
                 }
             },
 
-            heuristic(from: string, to: string) {
-                return 0;
+            heuristic(from: string, to: string) { return 0; },
+
+            isAtGoal(candidate: string, goal: string) {
+                return candidate === goal;
             }
         }
 
-        const result = A_starSearch(graph, "A", "B");
-        const shortestRoute = result.get("B")!.costSoFar;
-        expect(shortestRoute).toStrictEqual(6);
+        const cheapestCostToGoal = A_starSearch(graph, "A", "B");
+        expect(cheapestCostToGoal).toStrictEqual(6);
     });
 
     // TODO: Can we demonstrate heuristic's working?

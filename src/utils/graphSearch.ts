@@ -59,26 +59,34 @@ export interface Graph<TNode> {
     neighbours(currentNode: TNode): Iterable<TNode>;
 }
 
+
 // BFS for reference: This visits all nodes, but doesn't do anything else -
 // can customise it to calculate things at or report more about what it finds.
 export function breadthFirstSearch<TNode>(graph: Graph<TNode>, start: TNode) {
-    const frontier = new FifoQueue<TNode>();
-    const reached = new Set<TNode>();
+    // Objects will be saved for comparisons.
+    type SavedNode = string;
+    const save = (n: TNode): SavedNode => JSON.stringify(n);
+    const load = (s: SavedNode): TNode => JSON.parse(s);
 
-    frontier.push(start);
-    reached.add(start);
+    const frontier = new FifoQueue<SavedNode>();
+    const reached = new Set<SavedNode>();
+
+    const savedStart = save(start);
+    frontier.push(savedStart);
+    reached.add(savedStart);
 
     while (!frontier.isEmpty()) {
         const current = frontier.pull()!;
-        for (const n of graph.neighbours(current)) {
-            if (!reached.has(n)) {
-                frontier.push(n);
-                reached.add(n);
+        for (const n of graph.neighbours(load(current))) {
+            const savedNeighbour = save(n);
+            if (!reached.has(savedNeighbour)) {
+                frontier.push(savedNeighbour);
+                reached.add(savedNeighbour);
             }
         }
     }
 
-    return reached;
+    return new Set([...reached].map(load));
 }
 
 
@@ -177,30 +185,45 @@ export interface WeightedGraph<TNode> {
     //
     // You can use A* search with no heuristic (just return 0) to do Dijkstra's algorithm.
     heuristic(from: TNode, to: TNode): number;
+
+    isAtGoal(candidate: TNode, goal: TNode): boolean;
 }
 
 export function A_starSearch<TNode>(graph: WeightedGraph<TNode>, start: TNode, goal: TNode) {
-    const frontier = new MinPriorityQueue<TNode>();
-    const visited = new Map<TNode, { costSoFar: number, cameFrom: TNode | null }>();
+    // Objects will be saved for comparisons.
+    type SavedNode = string;
+    const save = (n: TNode): SavedNode => JSON.stringify(n);
+    const load = (s: SavedNode): TNode => JSON.parse(s);
 
-    frontier.push(start, 0);
-    visited.set(start, { costSoFar: 0, cameFrom: null});
+    const frontier = new MinPriorityQueue<SavedNode>();
+    const visited = new Map<SavedNode, { costSoFar: number, cameFrom: SavedNode | null }>();
+
+    const savedStart = save(start);
+    frontier.push(savedStart, 0);
+    visited.set(savedStart, { costSoFar: 0, cameFrom: null});
 
     while (!frontier.isEmpty()) {
-        const current = frontier.pull()!;
-        if (current === goal) break;
+        const savedCurrent = frontier.pull()!;
+        const current = load(savedCurrent);
+        if (graph.isAtGoal(current, goal)) {
+            // Goal reached! Return the cost to get here.
+            // This function can be adapted to return more info as needed.
+            return visited.get(savedCurrent)!.costSoFar;
+        }
 
         for (const n of graph.neighbours(current)) {
-            const newCost = visited.get(current)!.costSoFar + n.cost;
-            const oldCost = visited.get(n.node)?.costSoFar;
+            const savedNeighbour = save(n.node);
+            const newCost = visited.get(savedCurrent)!.costSoFar + n.cost;
+            const oldCost = visited.get(savedNeighbour)?.costSoFar;
 
             // If we haven't been here before, _or_ if we've found a cheaper way to get here
             if (oldCost === undefined || newCost < oldCost) {
                 const priority = newCost + graph.heuristic(n.node, goal);
-                frontier.push(n.node, priority);
-                visited.set(n.node, { costSoFar: newCost, cameFrom: current});
+                frontier.push(savedNeighbour, priority);
+                visited.set(savedNeighbour, { costSoFar: newCost, cameFrom: savedCurrent});
             }
         }
     }
-    return visited;
+    // The end of all our exploring.
+    throw new Error("No path to the goal was found.")
 }
