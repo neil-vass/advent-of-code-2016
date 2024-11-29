@@ -208,7 +208,7 @@ export function A_starSearch<TNode>(graph: WeightedGraph<TNode>, start: TNode, g
         if (graph.isAtGoal(current, goal)) {
             // Goal reached! Return the cost to get here.
             // This function can be adapted to return more info as needed.
-            return visited.get(savedCurrent)!.costSoFar;
+            return visited.get(savedCurrent)!;
         }
 
         for (const n of graph.neighbours(current)) {
