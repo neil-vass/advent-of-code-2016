@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {doorIsOpen, hash, isInBounds, solvePart1, VaultExplorer} from "./day17.js";
+import {doorIsOpen, hash, isInBounds, solvePart1, solvePart2, VaultExplorer} from "./day17.js";
 
 
 describe("Part 1", () => {
@@ -23,5 +23,12 @@ describe("Part 1", () => {
         expect(solvePart1("ihgpwlah")).toBe("DDRRRD");
         expect(solvePart1("kglvqrro")).toBe("DDUDRLRRUDRD");
     });
+});
 
+describe("Part 2", () => {
+    it("Solves examples", () => {
+        expect(solvePart2("ihgpwlah")).toBe(370);
+        expect(solvePart2("kglvqrro")).toBe(492);
+        expect(solvePart2("ulqzkmiv")).toBe(830);
+    });
 });

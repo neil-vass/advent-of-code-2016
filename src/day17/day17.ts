@@ -1,4 +1,4 @@
-import {A_starSearch, WeightedGraph} from "../utils/graphSearch.js";
+import {A_starSearch, breadthFirstSearch, Graph, WeightedGraph} from "../utils/graphSearch.js";
 import {md5} from "js-md5";
 import {singleLineFromFile} from "generator-sequences";
 
@@ -49,7 +49,9 @@ function moveFn(dir: string, xChange: number, yChange: number, passcode: string)
 
 
 
-export class VaultExplorer implements WeightedGraph<GameState> {
+export class VaultExplorer implements Graph<GameState>, WeightedGraph<GameState> {
+    readonly vaultLocation = { path: "", x: GAME_WIDTH-1, y: GAME_HEIGHT-1 };
+
     private readonly moveChecks: ((x: GameState) => GameState | undefined)[];
 
     constructor(private readonly passcode: string) {
@@ -61,10 +63,20 @@ export class VaultExplorer implements WeightedGraph<GameState> {
         ];
     }
 
-    *neighbours(currentNode: GameState): Iterable<{ node: GameState; cost: number; }> {
+    *neighbours(currentNode: GameState): Iterable<GameState> {
+        if(this.isAtGoal(currentNode, this.vaultLocation)) return;
+
         for (const checkDirection of this.moveChecks) {
             const neighbour = checkDirection(currentNode);
-            if (neighbour) yield { node: neighbour, cost: 1 };
+            if (neighbour) {
+                yield neighbour;
+            }
+        }
+    }
+
+    *neighboursWithCosts(currentNode: GameState): Iterable<{ node: GameState; cost: number; }> {
+        for (const node of this.neighbours(currentNode)) {
+            yield { node, cost: 1 };
         }
     }
 
@@ -82,15 +94,27 @@ export class VaultExplorer implements WeightedGraph<GameState> {
 
 export function solvePart1(passcode: string) {
     const initialState = { path: "", x: 0, y: 0 };
-    const goalState = { path: "", x: 3, y: 3 };
     const explorer = new VaultExplorer(passcode);
-    const searchResult = A_starSearch(explorer, initialState, goalState);
+    const searchResult = A_starSearch(explorer, initialState, explorer.vaultLocation);
     return searchResult.state.path;
+}
+
+export function solvePart2(passcode: string) {
+    const initialState = { path: "", x: 0, y: 0 };
+    const explorer = new VaultExplorer(passcode);
+
+    let longestPathSeen = 0;
+    for (const result of breadthFirstSearch(explorer, initialState)) {
+        if (explorer.isAtGoal(result, explorer.vaultLocation)) {
+            longestPathSeen = Math.max(longestPathSeen, result.path.length);
+        }
+    }
+    return longestPathSeen;
 }
 
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day17.input.txt`;
     const passcode = singleLineFromFile(filepath);
-    console.log(solvePart1(passcode));
+    console.log(solvePart2(passcode));
 }
