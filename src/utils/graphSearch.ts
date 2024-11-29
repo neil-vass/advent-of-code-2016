@@ -206,9 +206,9 @@ export function A_starSearch<TNode>(graph: WeightedGraph<TNode>, start: TNode, g
         const savedCurrent = frontier.pull()!;
         const current = load(savedCurrent);
         if (graph.isAtGoal(current, goal)) {
-            // Goal reached! Let caller know how we got here.
+            // Goal reached!
             const savedSolution = visited.get(savedCurrent)!;
-            return { cost: savedSolution.costSoFar,  state: load(savedSolution.cameFrom!) };
+            return { cost: savedSolution.costSoFar,  state: current };
         }
 
         for (const n of graph.neighbours(current)) {
