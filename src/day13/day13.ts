@@ -45,7 +45,7 @@ export function shortestPath(goal_x: number, goal_y: number, favourite: number) 
     const start = {x: 1, y: 1};
     const goal = {x: goal_x, y: goal_y};
     const route = A_starSearch(explorer, start, goal);
-    return route.costSoFar;
+    return route.cost;
 }
 
 // Adapted from breadthFirstSearch in graphSearch.ts.

@@ -79,7 +79,7 @@ describe("A* search", () => {
         }
 
         const bestRoute = A_starSearch(graph, "A", "B");
-        expect(bestRoute.costSoFar).toStrictEqual(1);
+        expect(bestRoute.cost).toStrictEqual(1);
 
     });
 
@@ -103,7 +103,7 @@ describe("A* search", () => {
         }
 
         const bestRoute = A_starSearch(graph, "A", "B");
-        expect(bestRoute.costSoFar).toStrictEqual(6);
+        expect(bestRoute.cost).toStrictEqual(6);
     });
 
     // TODO: Can we demonstrate heuristic's working?
