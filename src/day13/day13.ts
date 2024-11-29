@@ -13,7 +13,7 @@ export function isOpen(x: number, y: number, favourite: number) {
 class Explorer implements WeightedGraph<Pos> {
     constructor(readonly favourite: number) {}
 
-    *neighbours(currentNode: Pos): Iterable<{ node: Pos; cost: number; }> {
+    *neighboursWithCosts(currentNode: Pos): Iterable<{ node: Pos; cost: number; }> {
         const {x, y} = currentNode
 
         if (x > 0 && isOpen(x-1, y, this.favourite)) {
@@ -64,7 +64,7 @@ export function reachableLocations<TNode>(graph: WeightedGraph<TNode>, start: TN
     while (!frontier.isEmpty()) {
         const current = frontier.pull()!;
         if (current.steps >= maxSteps) continue;
-        for (const n of graph.neighbours(load(current.pos))) {
+        for (const n of graph.neighboursWithCosts(load(current.pos))) {
             const savedNode = save(n.node);
             if (!reached.has(savedNode)) {
                 frontier.push({ pos: savedNode, steps: current.steps+1 });

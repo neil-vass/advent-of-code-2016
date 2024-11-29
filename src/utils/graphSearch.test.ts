@@ -63,7 +63,7 @@ describe("A* search", () => {
 
     it("Gets from A to B", () => {
         const graph = {
-            neighbours(node: string) {
+            neighboursWithCosts(node: string) {
                 switch(node) {
                     case "A": return [{node: "B", cost: 1}];
                     case "B": return [];
@@ -85,7 +85,7 @@ describe("A* search", () => {
 
     it("Takes cheaper route with more nodes", () => {
         const graph = {
-            neighbours(node: string) {
+            neighboursWithCosts(node: string) {
                 switch(node) {
                     case "A": return [{node: "B", cost: 10}, {node: "C", cost: 2}];
                     case "B": return [];
