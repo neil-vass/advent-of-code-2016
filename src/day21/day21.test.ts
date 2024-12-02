@@ -1,5 +1,12 @@
 import {expect, describe, it} from "vitest";
-import {rotateRight, solvePart1} from "./day21.js";
+import {
+    reverseRotateBasedOnLetter,
+    rotateBasedOnLetter,
+    rotateLeft,
+    rotateRight,
+    solvePart1,
+    solvePart2
+} from "./day21.js";
 import {Sequence} from "generator-sequences";
 
 describe("Part 1", () => {
@@ -17,7 +24,16 @@ describe("Part 1", () => {
             "move position 3 to position 0",
             "rotate based on position of letter b",
             "rotate based on position of letter d"
-        ])
+        ]);
         expect(await solvePart1("abcde", instructions)).toBe("decab");
+    });
+});
+
+describe("Part 2", () => {
+    it("Undoes a rotate based on letter", async () => {
+        const initial = [..."fbgdceah"];
+        const encoded = rotateBasedOnLetter(initial, "a");
+        const decoded = reverseRotateBasedOnLetter(encoded, "a");
+        expect(decoded).toStrictEqual(initial);
     });
 });

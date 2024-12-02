@@ -54,13 +54,31 @@ export function movePosition(password: string[], x: number, y: number) {
 // rotations. Once the index is determined, rotate the string to the
 // right one time, plus a number of times equal to that index, plus
 // one additional time if the index was at least 4"
-function rotateBasedOnLetter(password: string[], xLetter: string) {
+export function rotateBasedOnLetter(password: string[], xLetter: string) {
     const xPos = password.indexOf(xLetter);
     let rotations = 1 + xPos + (xPos >= 4 ? 1 : 0);
 
     let updated = [...password];
     for (let i = 0; i < rotations; i++) {
         updated = rotateRight(updated, 1);
+    }
+    return updated;
+}
+
+// There _isn't_ a way to undo this for arbitrary string sizes.
+// There is a solution for the string size we know we're getting here...
+export function reverseRotateBasedOnLetter(password: string[], xLetter: string) {
+    if (password.length !== 8) throw new Error(`Only works for 8 char strings`);
+
+    const xPos = password.indexOf(xLetter);
+    const lookup = { 0:9, 1:1, 2:6, 3:2, 4:7, 5:3, 6:8, 7:4 };
+
+    // @ts-ignore We know this is an 8 char string.
+    const rotations = lookup[xPos];
+
+    let updated = [...password];
+    for (let i = 0; i < rotations; i++) {
+        updated = rotateLeft(updated, 1);
     }
     return updated;
 }
@@ -90,6 +108,31 @@ export function applyOperation(password: string[], line: string) {
     throw new Error(`Unrecognized format: ${line}`);
 }
 
+export function reverseOperation(password: string[], line: string) {
+    let m = line.match(/^swap position (\d+) with position (\d+)$/);
+    if (m) return swapPositions(password, +m[1], +m[2]);
+
+    m = line.match(/^swap letter (.) with letter (.)$/);
+    if (m) return swapLetters(password, m[1], m[2]);
+
+    m = line.match(/^reverse positions (\d+) through (\d+)$/);
+    if (m) return reversePositions(password, +m[1], +m[2]);
+
+    m = line.match(/^rotate left (\d+) steps?$/)
+    if (m) return rotateRight(password, +m[1]);
+
+    m = line.match(/^rotate right (\d+) steps?$/)
+    if (m) return rotateLeft(password, +m[1]);
+
+    m = line.match(/^move position (\d+) to position (\d+)$/)
+    if (m) return movePosition(password, +m[2], +m[1]);
+
+    m = line.match(/^rotate based on position of letter (.)$/)
+    if (m) return reverseRotateBasedOnLetter(password, m[1]);
+
+    throw new Error(`Unrecognized format: ${line}`);
+}
+
 
 export async function solvePart1(password: string, instructions: Sequence<string>) {
     let scrambled = [...password];
@@ -99,9 +142,20 @@ export async function solvePart1(password: string, instructions: Sequence<string
     return scrambled.join("");
 }
 
+export async function solvePart2(password: string, instructions: Sequence<string>) {
+    let scrambled = [...password];
+    const instructionsInReverseOrder = (await instructions.toArray()).reverse();
+
+    for await (const line of instructionsInReverseOrder) {
+        scrambled = reverseOperation(scrambled, line);
+    }
+
+    return scrambled.join("");
+}
+
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day21.input.txt`;
     const instructions = linesFromFile(filepath);
-    console.log(await solvePart1("abcdefgh", instructions));
+    console.log(await solvePart2("fbgdceah", instructions));
 }
