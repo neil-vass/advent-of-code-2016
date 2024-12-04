@@ -56,3 +56,4 @@ if (`file://${process.argv[1]}` === import.meta.url) {
     const input = linesFromFile(filepath);
     console.log(await solvePart2(input));
 }
+
