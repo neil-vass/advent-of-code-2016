@@ -1,5 +1,5 @@
 import {expect, describe, it} from "vitest";
-import {solvePart1} from "./day23.js";
+import {findValueToSend} from "./day23.js";
 import {Sequence} from "generator-sequences";
 
 describe("Part 1", () => {
@@ -13,6 +13,7 @@ describe("Part 1", () => {
             "dec a",
             "dec a",
         ]);
-        expect(await solvePart1(lines)).toBe(3);
+        const initial_a = 7;
+        expect(await findValueToSend(lines, initial_a)).toBe(3);
     });
 });

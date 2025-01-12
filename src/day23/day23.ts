@@ -75,9 +75,9 @@ export class Assembunny {
     }
 }
 
-export async function solvePart1(lines: Sequence<string>) {
+export async function findValueToSend(lines: Sequence<string>, initial_a: number) {
     const computer = new Assembunny();
-    computer.setRegisterValue("a", 7);
+    computer.setRegisterValue("a", initial_a);
     const instructions = await lines.toArray();
     computer.run(instructions);
     return computer.getRegisterValue("a");
@@ -86,5 +86,6 @@ export async function solvePart1(lines: Sequence<string>) {
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
     const filepath = `${import.meta.dirname}/day23.input.txt`;
-    console.log(await solvePart1(linesFromFile(filepath)));
+    const initial_a = 7;
+    console.log(await findValueToSend(linesFromFile(filepath), initial_a));
 }
