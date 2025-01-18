@@ -11,6 +11,6 @@ describe("Part 1", () => {
             "#4.......3#",
             "###########",
         ]);
-        expect(await solve(lines)).toBe(14);
+        expect(await solve(lines, false)).toBe(14);
     });
 });
