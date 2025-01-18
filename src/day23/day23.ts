@@ -83,9 +83,17 @@ export async function findValueToSend(lines: Sequence<string>, initial_a: number
     return computer.getRegisterValue("a");
 }
 
+// Calculating for large numbers takes a long time. I exported the calculation
+// steps for initial_a = 6 to a spreadsheet, found the pattern, and confirmed
+// it's the same for some other values.
+export function shortcutCalculation(initial_a: number) {
+    let factorial = 1;
+    for (let n=initial_a; n>1; n--) factorial *= n;
+    return factorial + 95**2;
+}
+
 // If this script was invoked directly on the command line:
 if (`file://${process.argv[1]}` === import.meta.url) {
-    const filepath = `${import.meta.dirname}/day23.input.txt`;
-    const initial_a = 7;
-    console.log(await findValueToSend(linesFromFile(filepath), initial_a));
+    const initial_a = 12;
+    console.log(shortcutCalculation(initial_a));
 }

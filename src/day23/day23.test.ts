@@ -1,6 +1,6 @@
 import {expect, describe, it} from "vitest";
-import {findValueToSend} from "./day23.js";
-import {Sequence} from "generator-sequences";
+import {findValueToSend, shortcutCalculation} from "./day23.js";
+import {linesFromFile, Sequence} from "generator-sequences";
 
 describe("Part 1", () => {
     it("Solves example", async () => {
@@ -15,5 +15,15 @@ describe("Part 1", () => {
         ]);
         const initial_a = 7;
         expect(await findValueToSend(lines, initial_a)).toBe(3);
+    });
+});
+
+describe("Part 2", () => {
+    it("Calculates quickly", async () => {
+        // Uses the real puzzle input from a file.
+        const filepath = `${import.meta.dirname}/day23.input.txt`;
+        const lines = linesFromFile(filepath);
+        const initial_a = 7;
+        expect(await findValueToSend(lines, initial_a)).toBe(shortcutCalculation(initial_a));
     });
 });
