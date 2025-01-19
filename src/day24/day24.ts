@@ -58,7 +58,7 @@ export class Aircon implements WeightedGraph<AirconNode>{
             }
         }
         const collected = new Set(candidate.collectedLocations);
-        return this.requiredLocations.symmetricDifference(collected).size === 0;
+        return this.requiredLocations.difference(collected).size === 0;
     }
 
     findBestPathCost() {
